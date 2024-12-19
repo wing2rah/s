@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Upload</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .hamburger-menu {
+      position: fixed;
+      top: 0;
+      left: -250px;
+      width: 250px;
+      height: 100%;
+      background: #333;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: left 0.3s ease;
+    }
+    .hamburger-menu input, .hamburger-menu button {
+      margin: 10px 0;
+      padding: 10px;
+      width: 80%;
+    }
+    .hamburger-menu button {
+      background: #ff9800;
+      border: none;
+      cursor: pointer;
+      color: #fff;
+    }
+    #hamburgerButton {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: #ff9800;
+      border: none;
+      color: #fff;
+      font-size: 24px;
+      padding: 10px;
+      cursor: pointer;
+    }
+    .main-content {
+      margin-left: 50px;
+      padding: 20px;
+      flex: 1;
+    }
+    .gallery {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .gallery img {
+      max-width: 200px;
+      max-height: 200px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="hamburger-menu" id="hamburgerMenu">
+    <input type="text" id="imageTitle" placeholder="Enter image title">
+    <input type="file" id="imageInput" accept="image/*">
+    <button id="uploadButton">Upload Image</button>
+  </div>
+  <button id="hamburgerButton">&#9776;</button>
+  <main class="main-content">
+    <h1>Uploaded Images</h1>
+    <div id="gallery" class="gallery"></div>
+  </main>
+  <script>
+    const IMGDB_API_KEY = "55a044defee1828c86bde84d52f582ac"; // Replace with your ImgDB API key
+    const IMGDB_URL = "https://api.imgbb.com/1/upload";
+    
+    const hamburgerButton = document.getElementById("hamburgerButton");
+    const hamburgerMenu = document.getElementById("hamburgerMenu");
+    const uploadButton = document.getElementById("uploadButton");
+    const imageInput = document.getElementById("imageInput");
+    const imageTitle = document.getElementById("imageTitle");
+    const gallery = document.getElementById("gallery");
+
+    hamburgerButton.addEventListener("click", () => {
+      hamburgerMenu.style.left = hamburgerMenu.style.left === "0px" ? "-250px" : "0px";
+    });
+
+    uploadButton.addEventListener("click", async () => {
+      const file = imageInput.files[0];
+      const title = imageTitle.value.trim();
+      if (!file || !title) return alert("Please provide both an image and a title.");
+
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("title", title);
+
+      try {
+        const response = await fetch(IMGDB_URL, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${IMGDB_API_KEY}` },
+          body: formData,
+        });
+        if (!response.ok) throw new Error("Upload failed");
+        const data = await response.json();
+        const img = document.createElement("img");
+        img.src = data.data.url;
+        gallery.appendChild(img);
+      } catch (error) {
+        console.error(error);
+        alert("Error uploading image.");
+      }
+    });
+  </script>
+</body>
+</html>
